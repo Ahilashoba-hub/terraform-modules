@@ -1,0 +1,23 @@
+#cloud-config
+package_update: true
+packages:
+  - cifs-utils
+  - nginx
+write_files:
+  - path: /etc/smbcredentials/azurefiles.cred
+    permissions: '0600'
+    content: |
+      username='${storage_account_name}'
+      password=${storage_account_key}
+runcmd:
+  - mkfs.ext4 /dev/sdc
+  - mkdir /mnt/data
+  - mount /dev/sdc /mnt/data
+  - echo "/dev/sdc /mnt/data ext4 defaults,nofail 0 2" >> /etc/fstab
+
+  - mkdir -p /mnt/azurefiles
+  - echo "//<STORAGE_ACCOUNT>.file.core.windows.net/<SHARE_NAME> /mnt/azurefiles cifs nofail,vers=3.0,credentials=/etc/smbcredentials/azurefiles.cred,dir_mode=0777,file_mode=0777,serverino" >> /etc/fstab
+  - mount -a
+
+  - systemctl enable nginx
+  - systemctl start nginx
