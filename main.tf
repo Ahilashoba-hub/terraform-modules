@@ -4,6 +4,7 @@ module "resource_group" {
   location = "Central India"
 }
 
+
 module "network" {
   source              = "./modules/network"
   resource_group_name = module.resource_group.name
